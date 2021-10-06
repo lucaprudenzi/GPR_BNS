@@ -1,0 +1,13 @@
+universe = vanilla
+executable = ./compare_waveforms.py
+request_memory = 32G
+request_cpus = 8
+arguments = "$(Process) "
+getenv = True
++WantsAny=True
+log = log_lal/log.err
+error = log_lal/condorerr-$(cluster)-$(process).err
+output = log_lal/condorout-$(cluster)-$(process).out
+notification = never
+priority = 1
+queue 40

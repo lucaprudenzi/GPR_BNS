@@ -1,0 +1,13 @@
+universe = vanilla
+executable = ./waveform_hybrid.py
+request_memory = 32G
+request_cpus = 8
+arguments = "$(Process) "
+getenv = True
++WantsAny=True
+log = log_wf/log.err
+error = log_wf/condorerr-$(cluster)-$(process).err
+output = log_wf/condorout-$(cluster)-$(process).out
+notification = never
+priority = 1
+queue 40
