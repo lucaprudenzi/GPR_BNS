@@ -14,10 +14,8 @@ import json
 import scipy.optimize as opt
 from scipy.optimize import minimize
 import climin
-
 os.sys.path.append("../data/waveforms/")
 import compare_waveforms_base as compare_wf
-
 import matplotlib.pyplot as plt
 
 class GPR_george(GPR_base):
@@ -56,11 +54,11 @@ class GPR_george(GPR_base):
         """
 
         if self.nodes==False:
-            
 
             k0 = kernels.ConstantKernel(log_constant=np.log(1), ndim=4)
             k1 = kernels.Matern32Kernel(metric=[1,1,1,1], ndim=4)
-            kernel = 1.0 * kernels.ExpSquaredKernel([0.005,0.005],ndim=5,axes=[0,1]) \
+            kernel = kernels.ConstantKernel(log_constant=np.log(1), ndim=5) \
+                * kernels.ExpSquaredKernel([0.005,0.005],ndim=5,axes=[0,1]) \
                 * kernels.ExpSquaredKernel([0.005, 0.005], ndim=5, axes=[2,3]) \
                 * kernels.ExpSquaredKernel(100,ndim=5,axes=4)
             # k2 = kernels.ExpSquaredKernel(metric=1, ndim=4, axes=[3])
@@ -252,12 +250,10 @@ if __name__ == "__main__":
     gpr.train()
     gpr.test()
     plot.plot_frequency_evolution(gpr)
-
+    
     # gpr.add_training_points()
-
     #gpr_one_out(train=False)
     #plot.plot_distance()
-    
     #gpr.add_training_points() 
     #plot.plot_uncertainty(gpr)
     #plot.plot_uncertainty(gpr)

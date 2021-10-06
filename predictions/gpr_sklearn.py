@@ -211,10 +211,10 @@ def gpr_one_out(train=True):
         
         savedir = "saved_nodes/"+key1+"/"
         #savedir = "saved_nodes_Mf_lt/"+key1+"/"
-            
+        
         if not os.path.exists(savedir):
             os.makedirs(savedir)
-            
+        
         if train == True:
             json.dump(test_dict, open(savedir+"dict_test.json", 'w'), sort_keys=True, indent=4)
             json.dump(train_dict, open(savedir+"dict_train.json", 'w'), sort_keys=True, indent=4)

@@ -1,0 +1,12 @@
+universe = vanilla
+executable = ./gpr_sklearn.py
+request_memory = 32G
+request_cpus = 8
+getenv = True
++WantsAny=True
+log = log/log.err
+error = log/condorerr-$(cluster)-$(process).err
+output = log/condorout-$(cluster)-$(process).out
+notification = never
+priority = 1
+queue 1
