@@ -4,11 +4,10 @@ import numpy as np
 from pathlib import Path
 import joblib
 import os
-import plot
+# import plot
 import lal
 import george
 from george import kernels
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import plot
 import json
 import scipy.optimize as opt
@@ -115,69 +114,6 @@ class GPR_george(GPR_base):
             else:
                 self.y_predict, self.y_predict_var = gpr_model.predict(self.y_train, x_test, return_var=True)
                 self.y_predict_std = np.sqrt(self.y_predict_var)
-
-    def add_training_points(self):
-        """
-        Add N_new training points, one at a time, in the places where they are
-        more necessary
-        """
-        def err_func(new_point):
-            print(new_point)
-            m1, m2, s1z, s2z, lambda1, lambda2 = new_point
-            par = np.array([[m1, m2, s1z, s2z, lambda1, lambda2]])
-            pardict = {
-                    'm1':m1, 
-                    'm2':m2,
-                    's1z':s1z,
-                    's2z':s2z,
-                    'lambda1':lambda1,
-                    'lambda2':lambda2}
-            x_test, y_test = self.load_new_point_otf(pardict)
-            y_predict, y_predict_std = self.test(x_test=par)
-            #rms_err = 1/len(gpr.freq_train)*np.sqrt(np.sum(np.array(y_predict_std)**2))
-            rms_err = 1/len(gpr.freq_train)*np.sqrt(np.sum(np.array(y_predict-y_test)**2))
-            return rms_err
-        
-        N_new = 1
-        par_dict = {}
-        bounds = []
-        bounds.append((0.8, 2.4))
-        bounds.append((0.8, 2.4))
-        bounds.append((-0.5,0.5))
-        bounds.append((-0.5,0.5))
-        bounds.append((0, 3000))
-        bounds.append((0, 3000))
-
-        for n in range(N_new):
-            rms_err_max=-np.inf
-            print(n)
-            minimizer_kwargs = dict(method="L-BFGS-B", bounds=bounds)
-            worst_point = opt.basinhopping(err_func, [1.4, 1.4, 0, 0, 200, 200], niter=1, minimizer_kwargs=minimizer_kwargs)
-            #worst_point = opt.minimize(err_func, [1.4, 1.4, 0, 0, 200, 200], bounds=bounds)
-            m1_new, m2_new, s1z_new, s2z_new, lambda1_new, lambda2_new = worst_point.x
-
-            print("Worst new point: m1={}, m2={}, s1z={}, s2z={}, lambda1={}, lambda2={}".format(m1_new, m2_new, s1z_new, s2z_new, lambda1_new, lambda2_new))
-            print("Adding new point...")
-            par_dict[n] = {
-                    'm1': m1_new,
-                    'm2': m2_new,
-                    's1z': s1z_new,
-                    's2z': s2z_new,
-                    'lambda1': lambda1_new,
-                    'lambda2': lambda2_new
-            }
-            x_new, y_new = self.load_new_point_otf(par_dict[n]) 
-            x_new = x_new.reshape(1, -1)
-            y_new = y_new.reshape(-1, 1) # a row value for each freq node
-            
-            self.x_train = np.vstack([self.x_train, x_new]) # add row
-            self.y_train = np.hstack([self.y_train, y_new]) # add column
-
-            self.savedir = self.savedir+"_"+str(n+1)+"_added_points/"
-            Path(self.savedir).mkdir(parents=True, exist_ok=True)
-            self.train(verbose=False)
-
-        json.dump(par_dict, open("new_par.json", 'w'), sort_keys=True, indent=4)
 
 def gpr_verbose(gpr_model):
     """
