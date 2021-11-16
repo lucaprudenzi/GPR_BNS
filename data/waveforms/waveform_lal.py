@@ -14,7 +14,7 @@ from waveform_base import waveform_base
 
 
 class waveform_lal(waveform_base):
-    def __init__(self, fixed_par=None, approx_fd="SEOBNRv4T_Surrogate", approx_td = "SEOBNRv4T", f_lower=30, df = 0.01):
+    def __init__(self, fixed_par=None, approx_fd="SEOBNRv4T_Surrogate", approx_td = "SEOBNRv4T", f_lower=30, df = 0.005):
         super().__init__()
 
         # Starting frequency for generation of the FD waveform
@@ -29,7 +29,7 @@ class waveform_lal(waveform_base):
         self.delta_t = 1/self.srate
         self.distance_Mpc = 1 
         self.distance = self.distance_Mpc * lal.PC_SI * 1e6
-        self.inclination = 0.
+        self.inclination = np.pi/2
         self.coa_phase = 0.
         self.ecc = 0. 
 
@@ -41,6 +41,31 @@ class waveform_lal(waveform_base):
             for key, value in fixed_par.items():
                 self.par[key] = value
 
+    def set_parameters(self, key, value):
+        """
+        Extract parameters of the NR simulation from the LVC formatted h5 file
+        """
+
+        par_dict = value
+        self.par['m1'] = par_dict['m1'] # grav mass
+        self.par['m2'] = par_dict['m2'] # grav mass
+        self.par['M'] = self.par['m1']+self.par['m2']
+        self.par['lambda1'] = par_dict['lambda1']
+        self.par['lambda2'] = par_dict['lambda2']
+        self.par['s1x'] = par_dict['s1x']
+        self.par['s1y'] = par_dict['s1y']
+        self.par['s1z'] = par_dict['s1z']
+        self.par['s2x'] = par_dict['s2x']
+        self.par['s2y'] = par_dict['s2y']
+        self.par['s2z'] = par_dict['s2z']
+        
+        self.ecc = par_dict['ecc']
+        #self.par['kappa2t'] = par_dict['kappa2t']
+        self.par['kappa2t'] = lalsim.SimNRTunedTidesComputeKappa2T(self.par['m1']*lal.MSUN_SI, self.par['m2']*lal.MSUN_SI, self.par['lambda1'], self.par['lambda2'])
+        
+        self.f_merg = lalsim.SimNRTunedTidesMergerFrequency(self.par['M'], self.par['kappa2t'], self.par['m1']/self.par['m2'])
+        self.f_isco = lal.C_SI**3/(lal.MSUN_SI*self.par['M']*lal.G_SI*6**1.5*np.pi)
+        self.wf_file = "../NR_data/BAM_SACRA_data/"+key
 
     def get_h_td(self, method="lal"):
 
@@ -77,10 +102,11 @@ class waveform_lal(waveform_base):
 
             self.hp_td = hp_td.data.data
             self.hc_td = hc_td.data.data
+            self.dt = np.diff(self.time)[0]
             self.h_td_to_amp_phase_freq_td()
             #self.time = (np.arange(self.hp_td.data.length)-np.argmax(hp_td.data.data))*hp_td.deltaT
             self.time = (np.arange(int(len(self.amp_td)))-np.argmax(self.amp_td))*hp_td.deltaT
-            self.dt = np.diff(self.time)[0]
+
 
         if method == "pycbc": 
             self.hp_td, self.hc_td = pycbc.waveform.get_td_waveform(

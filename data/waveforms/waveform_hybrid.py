@@ -142,6 +142,7 @@ if __name__== "__main__":
     maybe_dict = json.load(open("../NR_data/BAM_SACRA_data/NRinfo_maybe.json"))
     short_dict = json.load(open("../NR_data/BAM_SACRA_data/NRinfo_short.json"))
     
+    
     # lambda5000_dict = json.load(open("../NR_data/BAM_SACRA_data/NRinfo_lambda5000.json"))
     # sacra_dict = json.load(open("../NR_data/BAM_SACRA_data/NRinfo_sacra.json"))
     # thc_dict = json.load(open("../NR_data/BAM_SACRA_data/NRinfo_thc.json"))
@@ -152,8 +153,8 @@ if __name__== "__main__":
     used_dict.update(sacra_dict)
     used_dict.update(maybe_dict)
 
-    dir_phase = "../NR_data/BAM_SACRA_data_deltaphase/"
-    dir_amp = "../NR_data/BAM_SACRA_data_deltaamp/"
+    dir_phase = "../NR_data/deltaphase/"
+    dir_amp = "../NR_data/deltaamp/"
     values_spin1 = [] 
     values_spin2 = [] 
     values_chieff = []
@@ -165,6 +166,10 @@ if __name__== "__main__":
     values_lambda1 = [] 
     values_lambda2 = [] 
     
+    Mf = np.linspace(0.0004, 0.03, 1000)
+    
+    i = 1
+
     # save all the parameters of all the sets
     for key, value in used_dict.items(): 
         values_spin1.append(value['s1z']) 
@@ -176,10 +181,13 @@ if __name__== "__main__":
     
     # cycle only on sets in used_dict
     for key, value in used_dict.items():
-        if os.path.exists(dir_phase+"placeholder/"+str(key[:-3])):
-            continue
-        if not os.path.exists(dir_phase+"placeholder/"+str(key[:-3])):
-            os.makedirs(dir_phase+"placeholder/"+str(key[:-3]))
+        # if os.path.exists(dir_phase+"placeholder/"+str(key[:-3])):
+        #     continue
+        # if not os.path.exists(dir_phase+"placeholder/"+str(key[:-3])):
+        #     os.makedirs(dir_phase+"placeholder/"+str(key[:-3]))
+        
+        if i>1:
+            break
 
         print("Load NR wf")
         wf_nr = waveform_nr() 
@@ -216,7 +224,6 @@ if __name__== "__main__":
         """
         FREQ DOMAIN PLOT
         """
-        Mf = np.linspace(0.0004, 0.03, 1000)
         f = Mf/lal.MTSUN_SI/(value['m1']+value['m2'])
 
         # AMP PLOT

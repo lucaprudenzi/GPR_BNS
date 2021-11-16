@@ -535,7 +535,7 @@ if __name__ == "__main__":
 
     # create_dict_NR_BNS_nospin()
     # create_dict_NR_BNS()
-    parameter_space_plot()
+    # parameter_space_plot()
 
     nr_dict = json.load(open("../NR_data/BAM_SACRA_data/NRinfo_yes.json"))
     i = 0

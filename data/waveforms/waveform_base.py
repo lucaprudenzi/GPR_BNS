@@ -15,23 +15,24 @@ class waveform_base(object):
         """
         From FD hp and hc to FD amp and phase
         """
-        # hp_td = TimeSeries(self.hp_td, delta_t = self.dt) 
-        # hc_td = TimeSeries(self.hc_td, delta_t = self.dt)
-        self.amp_td = wf.utils.amplitude_from_polarizations(self.hp_td, self.hc_td)
-        self.phase_td = wf.utils.phase_from_polarizations(self.hp_td, self.hc_td, remove_start_phase=False)
-        self.freq_td = wf.utils.frequency_from_polarizations(self.hp_td, self.hc_td)
+        hp_td = TimeSeries(self.hp_td, delta_t = self.dt) 
+        hc_td = TimeSeries(self.hc_td, delta_t = self.dt)
+        self.amp_td = wf.utils.amplitude_from_polarizations(hp_td, hc_td)
+        self.phase_td = wf.utils.phase_from_polarizations(hp_td, hc_td, remove_start_phase=False)
+        self.freq_td = wf.utils.frequency_from_polarizations(hp_td, hc_td)
 
     def h_fd_to_amp_phase_fd(self):
         """
         From FD hp and hc to FD amp and phase
         """
-        hp_fd = FrequencySeries(self.hp_fd, delta_f = self.df) 
-        hc_fd = FrequencySeries(self.hc_fd, delta_f = self.df)
-        h_fd = hp_fd+1j*hc_fd
-        self.phase_fd = wf.utils.phase_from_frequencyseries(h_fd)
-        self.amp_fd = wf.utils.amplitude_from_frequencyseries(h_fd)
-        #self.phase_fd = np.unwrap(np.angle(hp_fd+1j*hc_fd))
-        #self.amp_fd = np.absolute(hp_fd+1j*hc_fd)
+        self.h_fd = self.hp_fd+1j*self.hc_fd
+        # hp_fd = FrequencySeries(self.hp_fd, delta_f = self.df) 
+        # hc_fd = FrequencySeries(self.hc_fd, delta_f = self.df)
+        # self.phase_fd = wf.utils.phase_from_frequencyseries(h_fd)
+        # self.amp_fd = wf.utils.amplitude_from_frequencyseries(h_fd)
+
+        self.phase_fd = np.unwrap(np.angle(self.h_fd))
+        self.amp_fd = np.absolute(self.h_fd)
 
     def amp_phase_fd_to_h_fd(self):
         """
@@ -157,6 +158,7 @@ class waveform_base(object):
                     taper = 1-expit((x1 - x2)/(i - x2)+(x1 - x2)/(i - x1))
                 taper_arr.append(taper)
             return np.array(taper_arr)
+
         if side == "tap_at_left":
             for i in x:
                 if (i <= x1):
